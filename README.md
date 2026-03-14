@@ -20,11 +20,11 @@ hwy create my-app --template advanced
 | Template | Description |
 |----------|-------------|
 | **starter** | Minimal setup — one Seed, one Guard, server only. Best for learning. |
-| **advanced** | SSR + CSR + CLI — multi-platform app with Vue integration. *(coming soon)* |
+| **advanced** | SSR + CSR + CLI — multi-platform app with Vue integration. |
 
 ## Template Structure
 
-Each template lives under `templates/<name>/` and must contain at least:
+Each template lives under `<name>/` at the repository root and must contain at least:
 
 - `package.json` — dependencies and scripts
 - `project.config.ts` — CLI build configuration

@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "ESNext",
+    "rootDir": "./",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@hwy-fm/platform": ["./platform"],
+      "@hwy-fm/platform/*": ["./platform/*"],
+      "@view/deliver": ["./src/views/vue/deliver.server"],
+      "@app/business": ["./src/kernel/business.progress.server"]
+    },
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": false,
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*", "platform/**/*", "global.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

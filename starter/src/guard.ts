@@ -7,7 +7,7 @@
 import { Kernel } from '@hwy-fm/kernel';
 
 @Kernel.Guard.instruction('**')
-class LogGuard {
+export class LogGuard {
   execute(ctx: any) {
     console.log(`[guard] path=${ctx.metadata.path}`);
   }

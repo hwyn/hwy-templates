@@ -1,0 +1,5 @@
+{
+  "_default": "advanced",
+  "starter": "Minimal project setup",
+  "advanced": "Full-stack SSR/CSR/CLI with Vue"
+}

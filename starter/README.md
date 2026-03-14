@@ -1,6 +1,6 @@
 # my-hwy-app
 
-A minimal [**@hwy-fm**](https://github.com/hwyn) application.
+A minimal [**@hwy-fm**](https://www.npmjs.com/org/hwy-fm) application.
 
 ## Get Started
 

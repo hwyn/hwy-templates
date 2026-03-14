@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "title": "Welcome to Kernel",
+    "content": "A microkernel architecture for TypeScript applications",
+    "createdAt": "2026-01-01"
+  },
+  {
+    "id": "2",
+    "title": "Seed & Instruction",
+    "content": "Seeds handle routes, Instructions cross-cut concerns",
+    "createdAt": "2026-01-02"
+  },
+  {
+    "id": "3",
+    "title": "STD Slots Pipeline",
+    "content": "Catch → Receive → Guard → Check → Process → Deliver → Trace",
+    "createdAt": "2026-01-03"
+  }
+]

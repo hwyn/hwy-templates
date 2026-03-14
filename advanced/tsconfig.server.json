@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@hwy-fm/platform": ["./platform/server"],
+      "@hwy-fm/platform/*": ["./platform/server/*"]
+    }
+  }
+}
