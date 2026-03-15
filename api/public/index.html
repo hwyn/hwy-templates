@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kernel API — Dual Protocol Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; background: #0d1117; color: #c9d1d9; padding: 24px; }
+  h1 { text-align: center; font-size: 20px; color: #58a6ff; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #8b949e; font-size: 13px; margin-bottom: 24px; }
+  .columns { display: flex; gap: 20px; max-width: 1100px; margin: 0 auto; }
+  .panel { flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .panel h2 { font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-http { background: #3fb950; }
+  .dot-ws { background: #d29922; }
+  .dot-ws.connected { background: #3fb950; }
+  .actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  button { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; text-align: left; transition: background 0.15s; }
+  button:hover { background: #30363d; }
+  button .label { color: #58a6ff; font-weight: 600; }
+  button .desc { color: #8b949e; font-size: 12px; }
+  .log { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px; max-height: 400px; overflow-y: auto; font-size: 12px; line-height: 1.8; }
+  .log-entry { border-bottom: 1px solid #21262d; padding: 6px 0; }
+  .log-entry:last-child { border: none; }
+  .log-req { color: #79c0ff; }
+  .log-res { color: #a5d6ff; white-space: pre-wrap; word-break: break-all; }
+  .log-err { color: #f85149; }
+  .log-time { color: #484f58; font-size: 11px; }
+  .shared-note { text-align: center; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px; margin: 16px auto 0; max-width: 1100px; color: #8b949e; font-size: 13px; }
+  .shared-note em { color: #d29922; font-style: normal; }
+  .config { max-width: 1100px; margin: 0 auto 16px; display: flex; gap: 12px; align-items: center; justify-content: center; }
+  .config label { color: #8b949e; font-size: 13px; }
+  .config input { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; border-radius: 4px; font-size: 13px; width: 160px; }
+</style>
+</head>
+<body>
+
+<h1>Kernel Dual-Protocol Demo</h1>
+<p class="subtitle">Same pipeline, same auth, same business logic — two protocols</p>
+
+<div class="config">
+  <label>API Key:</label>
+  <input type="text" id="apiKey" value="my-secret-key">
+</div>
+
+<div class="columns">
+  <!-- HTTP Panel -->
+  <div class="panel">
+    <h2><span class="dot dot-http"></span> HTTP</h2>
+    <div class="actions">
+      <button onclick="httpReq('GET', '/')">
+        <span class="label">GET /</span> <span class="desc">— API info</span>
+      </button>
+      <button onclick="httpReq('GET', '/notes', true)">
+        <span class="label">GET /notes</span> <span class="desc">— List notes (auth)</span>
+      </button>
+      <button onclick="httpCreate()">
+        <span class="label">POST /notes</span> <span class="desc">— Create note (auth)</span>
+      </button>
+      <button onclick="httpReq('GET', '/notes/1', true)">
+        <span class="label">GET /notes/1</span> <span class="desc">— Get note by id (auth)</span>
+      </button>
+      <button onclick="httpReq('GET', '/notes', false)">
+        <span class="label">GET /notes</span> <span class="desc">— No auth (expect 401)</span>
+      </button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="color:#484f58;font-size:12px">Log</span>
+      <button onclick="document.getElementById('httpLog').innerHTML=''" style="padding:2px 8px;font-size:11px">Clear</button>
+    </div>
+    <div class="log" id="httpLog"></div>
+  </div>
+
+  <!-- WebSocket Panel -->
+  <div class="panel">
+    <h2><span class="dot dot-ws" id="wsDot"></span> WebSocket <span id="wsStatus" style="color:#8b949e;font-size:12px"></span></h2>
+    <div class="actions">
+      <button onclick="wsSend({path:'/'})">
+        <span class="label">GET /</span> <span class="desc">— API info</span>
+      </button>
+      <button onclick="wsSend({path:'/notes',apiKey:getKey()})">
+        <span class="label">GET /notes</span> <span class="desc">— List notes (auth)</span>
+      </button>
+      <button onclick="wsCreate()">
+        <span class="label">POST /notes</span> <span class="desc">— Create note (auth)</span>
+      </button>
+      <button onclick="wsSend({path:'/notes/1',apiKey:getKey()})">
+        <span class="label">GET /notes/1</span> <span class="desc">— Get note by id (auth)</span>
+      </button>
+      <button onclick="wsSend({path:'/notes'})">
+        <span class="label">GET /notes</span> <span class="desc">— No auth (expect 401)</span>
+      </button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="color:#484f58;font-size:12px">Log</span>
+      <button onclick="document.getElementById('wsLog').innerHTML=''" style="padding:2px 8px;font-size:11px">Clear</button>
+    </div>
+    <div class="log" id="wsLog"></div>
+  </div>
+</div>
+
+<div class="shared-note">
+  💡 Create a note on <em>one side</em>, then list notes on the <em>other</em> — same DI singleton, zero duplication.
+</div>
+
+<script>
+const getKey = () => document.getElementById('apiKey').value;
+
+async function httpReq(method, path, auth) {
+  const log = document.getElementById('httpLog');
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth) headers['X-API-Key'] = getKey();
+
+  logReq(log, `${method} ${path}`);
+  try {
+    const res = await fetch(path, { method, headers });
+    const data = await res.json();
+    logRes(log, res.status, data);
+  } catch (e) {
+    logErr(log, e.message);
+  }
+}
+
+async function httpCreate() {
+  const title = prompt('Note title:', 'HTTP Note #' + Date.now().toString(36));
+  if (!title) return;
+  const log = document.getElementById('httpLog');
+  logReq(log, `POST /notes`);
+  try {
+    const res = await fetch('/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': getKey() },
+      body: JSON.stringify({ title, content: 'Created via HTTP' })
+    });
+    const data = await res.json();
+    logRes(log, res.status, data);
+  } catch (e) {
+    logErr(log, e.message);
+  }
+}
+
+let ws;
+function connectWs() {
+  const dot = document.getElementById('wsDot');
+  const status = document.getElementById('wsStatus');
+  ws = new WebSocket(`ws://${location.host}`);
+  ws.onopen = () => { dot.classList.add('connected'); status.textContent = 'connected'; };
+  ws.onclose = () => { dot.classList.remove('connected'); status.textContent = 'disconnected'; setTimeout(connectWs, 2000); };
+  ws.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.event === 'created') {
+        logPush(document.getElementById('wsLog'), 'New note pushed from other protocol:');
+        logRes(document.getElementById('wsLog'), 200, data.data);
+        return;
+      }
+      logRes(document.getElementById('wsLog'), data.status || 200, data);
+    } catch {
+      logErr(document.getElementById('wsLog'), e.data);
+    }
+  };
+}
+connectWs();
+
+function wsSend(msg) {
+  if (!ws || ws.readyState !== 1) { logErr(document.getElementById('wsLog'), 'Not connected'); return; }
+  const display = `${msg.method || 'GET'} ${msg.path}`;
+  logReq(document.getElementById('wsLog'), display);
+  ws.send(JSON.stringify(msg));
+}
+
+function wsCreate() {
+  const title = prompt('Note title:', 'WS Note #' + Date.now().toString(36));
+  if (!title) return;
+  wsSend({ path: '/notes', method: 'POST', apiKey: getKey(), body: { title, content: 'Created via WebSocket' } });
+}
+
+function logReq(el, text) {
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = `<span class="log-time">${time()}</span> <span class="log-req">→ ${esc(text)}</span>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function logRes(el, status, data) {
+  const last = el.lastElementChild;
+  if (last) {
+    const span = document.createElement('div');
+    const color = status < 400 ? 'log-res' : 'log-err';
+    span.innerHTML = `<span class="${color}">← ${status} ${esc(JSON.stringify(data, null, 2))}</span>`;
+    last.appendChild(span);
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+function logErr(el, msg) {
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = `<span class="log-time">${time()}</span> <span class="log-err">✗ ${esc(msg)}</span>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function logPush(el, msg) {
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = `<span class="log-time">${time()}</span> <span style="color:#d29922">⚡ ${esc(msg)}</span>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function time() { return new Date().toLocaleTimeString(); }
+function esc(s) { const d = document.createElement('span'); d.textContent = s; return d.innerHTML; }
+</script>
+</body>
+</html>

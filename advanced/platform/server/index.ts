@@ -1,4 +1,3 @@
-import './middleware';
 import './pipeline';
 import './html-admission';
 

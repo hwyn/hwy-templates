@@ -1,5 +1,6 @@
 {
-  "_default": "advanced",
+  "_default": "api",
   "starter": "Minimal project setup",
+  "api": "HTTP + WebSocket, one codebase",
   "advanced": "Full-stack SSR/CSR/CLI with Vue"
 }
