@@ -5,7 +5,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "ESNext",
-    "rootDir": "./",
     "moduleResolution": "Bundler",
     "paths": {
       "@hwy-fm/platform": ["./platform"],
@@ -19,7 +18,6 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
     "removeComments": false,
     "importHelpers": true,
     "allowSyntheticDefaultImports": true,
